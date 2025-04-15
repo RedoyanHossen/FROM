@@ -7,7 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'SolaimanLipi', 'Bangla', Arial, sans-serif;
       background: #f0f0f0;
       display: flex;
       justify-content: center;
@@ -30,6 +30,7 @@
 
     label {
       margin-top: 10px;
+      font-weight: bold;
     }
 
     input, textarea {
@@ -37,16 +38,22 @@
       margin-top: 5px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      font-family: inherit;
     }
 
     button {
       margin-top: 15px;
       padding: 10px;
-      background-color: #1d72b8;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-family: inherit;
+      font-weight: bold;
+    }
+
+    #submitBtn {
+      background-color: #1d72b8;
     }
 
     #downloadBtn {
@@ -56,7 +63,7 @@
 </head>
 <body>
   <div class="form-container">
-    <h2>সামাজিক সংগঠনের সদস্য ফরম</h2>
+    <h2 style="text-align: center;">সামাজিক সংগঠনের সদস্য ফরম</h2>
     <form id="memberForm">
       <label for="name">নাম:</label>
       <input type="text" id="name" name="name" required>
@@ -68,19 +75,44 @@
       <input type="text" id="phone" name="phone" required>
 
       <label for="address">ঠিকানা:</label>
-      <textarea id="address" name="address" required></textarea>
+      <textarea id="address" name="address" rows="4" required></textarea>
 
-      <button type="submit">সাবমিট করুন</button>
+      <button type="submit" id="submitBtn">সাবমিট করুন</button>
       <button type="button" id="downloadBtn">PDF ডাউনলোড করুন</button>
     </form>
   </div>
 
   <script>
     const { jsPDF } = window.jspdf;
+    // Replace with your Google Apps Script web app URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
     document.getElementById("memberForm").addEventListener("submit", function(event){
       event.preventDefault();
-      alert("ফরম সফলভাবে জমা হয়েছে!");
+      
+      const formData = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        address: document.getElementById("address").value
+      };
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.text())
+      .then(data => {
+        alert("ফরম সফলভাবে জমা হয়েছে!");
+        document.getElementById("memberForm").reset();
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("একটি সমস্যা হয়েছে! পরে আবার চেষ্টা করুন।");
+      });
     });
 
     document.getElementById("downloadBtn").addEventListener("click", function() {
@@ -96,14 +128,19 @@
 
       const doc = new jsPDF();
 
+      // Add Bengali text support (you might need additional fonts for full support)
       doc.setFont("helvetica", "normal");
-      doc.text("সামাজিক সংগঠনের সদস্য ফরম", 20, 20);
-      doc.text(নাম: ${name}, 20, 40);
-      doc.text(ইমেইল: ${email}, 20, 50);
-      doc.text(ফোন নম্বর: ${phone}, 20, 60);
-      doc.text(ঠিকানা: ${address}, 20, 70);
+      doc.setFontSize(16);
+      doc.text("সামাজিক সংগঠনের সদস্য ফরম", 105, 20, {align: "center"});
+      
+      doc.setFontSize(12);
+      doc.text("নাম: " + name, 20, 40);
+      doc.text("ইমেইল: " + email, 20, 50);
+      doc.text("ফোন নম্বর: " + phone, 20, 60);
+      doc.text("ঠিকানা: " + address, 20, 70, {maxWidth: 170});
 
-      doc.save(${name}_member_form.pdf);
+      // Save the PDF with member's name
+      doc.save(name + "_member_form.pdf");
     });
   </script>
 </body>
