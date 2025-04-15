@@ -2,13 +2,12 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>সামাজিক সংগঠনের সদস্য ফরমa</title>
+  <title>সদস্য ফর্ম</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       background: #f0f0f0;
       display: flex;
       justify-content: center;
@@ -22,30 +21,21 @@
       max-width: 500px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      margin-top: 10px;
-    }
     input, textarea {
-      padding: 8px;
+      width: 100%;
       margin-top: 5px;
+      padding: 10px;
+      margin-bottom: 15px;
       border-radius: 5px;
       border: 1px solid #ccc;
     }
     button {
-      margin-top: 15px;
       padding: 10px;
-      background-color: #1d72b8;
+      background-color: #28a745;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-    }
-    #downloadBtn {
-      background-color: #28a745;
     }
   </style>
 </head>
@@ -53,65 +43,78 @@
   <div class="form-container">
     <h2>সামাজিক সংগঠনের সদস্য ফরম</h2>
     <form id="memberForm">
-      <label for="name">নাম:</label>
-      <input type="text" id="name" name="name" required>
+      <label>নাম:</label>
+      <input type="text" id="name" required>
 
-      <label for="email">ইমেইল:</label>
-      <input type="email" id="email" name="email" required>
+      <label>ইমেইল:</label>
+      <input type="email" id="email" required>
 
-      <label for="phone">ফোন নম্বর:</label>
-      <input type="text" id="phone" name="phone" required>
+      <label>ফোন নম্বর:</label>
+      <input type="text" id="phone" required>
 
-      <label for="address">ঠিকানা:</label>
-      <textarea id="address" name="address" required></textarea>
+      <label>ঠিকানা:</label>
+      <textarea id="address" required></textarea>
 
-      <button type="submit">সাবমিট করুন</button>
       <button type="button" id="downloadBtn">PDF ডাউনলোড করুন</button>
     </form>
   </div>
 
-  <script>
-    if (typeof window.jspdf !== 'undefined') {
+  <script type="module">
+    import { jsPDF } from "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+
+    // Load custom Bengali font (SolaimanLipi or NotoSansBengali)
+    const fontUrl = 'https://cdn.jsdelivr.net/gh/redoyhossain/fonts@main/NotoSansBengali-Regular.ttf';
+
+    const getFontBase64 = async () => {
+      const response = await fetch(fontUrl);
+      const buffer = await response.arrayBuffer();
+      const base64 = btoa(
+        String.fromCharCode(...new Uint8Array(buffer))
+      );
+      return base64;
+    };
+
+    document.getElementById("downloadBtn").addEventListener("click", async () => {
       const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-      document.getElementById("downloadBtn").addEventListener("click", function () {
-        const name = document.getElementById("name").value;
-        const email = document.getElementById("email").value;
-        const phone = document.getElementById("phone").value;
-        const address = document.getElementById("address").value;
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const phone = document.getElementById("phone").value;
+      const address = document.getElementById("address").value;
 
-        if (!name || !email || !phone || !address) {
-          alert("অনুগ্রহ করে সকল ঘর পূরণ করুন!");
-          return;
+      if (!name || !email || !phone || !address) {
+        alert("সকল ঘর পূরণ করুন!");
+        return;
+      }
+
+      const fontData = await getFontBase64();
+      doc.addFileToVFS("NotoSansBengali.ttf", fontData);
+      doc.addFont("NotoSansBengali.ttf", "NotoSansBengali", "normal");
+      doc.setFont("NotoSansBengali");
+
+      doc.setFontSize(14);
+      doc.text("সদস্য তথ্য", 105, 20, { align: "center" });
+
+      const data = [
+        ["নাম", name],
+        ["ইমেইল", email],
+        ["ফোন", phone],
+        ["ঠিকানা", address]
+      ];
+
+      doc.autoTable({
+        startY: 30,
+        head: [["ফিল্ড", "তথ্য"]],
+        body: data,
+        styles: {
+          font: "NotoSansBengali",
+          fontSize: 12
         }
-
-        const doc = new jsPDF();
-        doc.setFont("helvetica");
-        doc.setFontSize(16);
-        doc.text("সদস্যের তথ্য", 105, 20, { align: "center" });
-
-        // Table with member data
-        doc.autoTable({
-          startY: 30,
-          head: [['ফিল্ড', 'তথ্য']],
-          body: [
-            ['নাম', name],
-            ['ইমেইল', email],
-            ['ফোন নম্বর', phone],
-            ['ঠিকানা', address]
-          ],
-          styles: {
-            font: "helvetica",
-            fontSize: 12
-          }
-        });
-
-        doc.save(`${name}_তথ্য.pdf`);
       });
-    } else {
-      console.error("jsPDF library not loaded!");
-      alert("PDF লাইব্রেরি লোড করতে সমস্যা হয়েছে। পৃষ্ঠাটি রিফ্রেশ করুন।");
-    }
+
+      doc.save(`${name}_info.pdf`);
+    });
   </script>
 </body>
 </html>
