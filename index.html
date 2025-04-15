@@ -1,162 +1,89 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>সদস্য ফর্ম</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  <title>Mini Subway Runner</title>
   <style>
-    body {
-      font-family: 'Hind Siliguri', sans-serif;
-      background: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-    .form-container {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    input, textarea {
-      width: 100%;
-      margin-top: 5px;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-family: inherit;
-    }
-    button {
-      padding: 12px 20px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: inherit;
-      font-weight: bold;
-      transition: all 0.3s;
-    }
-    button:hover {
-      background-color: #218838;
-      transform: translateY(-2px);
-    }
-    label {
-      font-weight: bold;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; overflow: hidden; font-family: sans-serif; }
+    canvas { display: block; margin: 0 auto; background: #333; border: 5px solid #222; }
+    #score { color: white; text-align: center; margin-top: 10px; font-size: 24px; }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="form-container">
-    <h2 style="text-align: center;">সামাজিক সংগঠনের সদস্য ফরম</h2>
-    <form id="memberForm">
-      <label>নাম:</label>
-      <input type="text" id="name" required placeholder="আপনার পূর্ণ নাম লিখুন">
-
-      <label>ইমেইল:</label>
-      <input type="email" id="email" required placeholder="আপনার ইমেইল ঠিকানা">
-
-      <label>ফোন নম্বর:</label>
-      <input type="text" id="phone" required placeholder="আপনার মোবাইল নম্বর">
-
-      <label>ঠিকানা:</label>
-      <textarea id="address" required placeholder="আপনার বর্তমান ঠিকানা" rows="4"></textarea>
-
-      <button type="button" id="downloadBtn">PDF ডাউনলোড করুন</button>
-    </form>
-  </div>
-
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="score">Score: 0</div>
   <script>
-    // Initialize jsPDF
-    const { jsPDF } = window.jspdf;
-    
-    // Load Bengali font
-    async function loadBengaliFont() {
-      try {
-        const fontUrl = 'https://fonts.googleapis.com/css2?family=Hind+Siliguri&display=swap';
-        const fontResponse = await fetch('https://fonts.gstatic.com/s/hindsiliguri/v12/ijwTs5juQtsyLLR5jN4cxBEofJvQxQ.ttf');
-        const fontData = await fontResponse.arrayBuffer();
-        return arrayBufferToBase64(fontData);
-      } catch (error) {
-        console.error('ফন্ট লোড করতে সমস্যা:', error);
-        return null;
-      }
-    }
-    
-    function arrayBufferToBase64(buffer) {
-      let binary = '';
-      const bytes = new Uint8Array(buffer);
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return window.btoa(binary);
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let player = { x: 180, y: 520, width: 40, height: 40, color: "yellow" };
+    let obstacles = [];
+    let score = 0;
+    let gameOver = false;
+
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
     }
 
-    document.getElementById("downloadBtn").addEventListener("click", async function() {
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const address = document.getElementById("address").value.trim();
+    function drawObstacles() {
+      ctx.fillStyle = "red";
+      obstacles.forEach(ob => {
+        ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+      });
+    }
 
-      if (!name || !email || !phone || !address) {
-        alert("অনুগ্রহ করে ফরমের সকল তথ্য পূরণ করুন!");
+    function updateObstacles() {
+      obstacles.forEach(ob => ob.y += 4);
+      obstacles = obstacles.filter(ob => ob.y < canvas.height);
+      if (Math.random() < 0.03) {
+        const lane = [60, 180, 300][Math.floor(Math.random() * 3)];
+        obstacles.push({ x: lane, y: -40, width: 40, height: 40 });
+      }
+    }
+
+    function detectCollision() {
+      for (let ob of obstacles) {
+        if (
+          player.x < ob.x + ob.width &&
+          player.x + player.width > ob.x &&
+          player.y < ob.y + ob.height &&
+          player.y + player.height > ob.y
+        ) {
+          gameOver = true;
+        }
+      }
+    }
+
+    function updateScore() {
+      score++;
+      document.getElementById("score").innerText = `Score: ${score}`;
+    }
+
+    function gameLoop() {
+      if (gameOver) {
+        ctx.fillStyle = "white";
+        ctx.font = "32px sans-serif";
+        ctx.fillText("Game Over", 120, 300);
         return;
       }
 
-      try {
-        const doc = new jsPDF();
-        
-        // Try to load Bengali font
-        const fontData = await loadBengaliFont();
-        if (fontData) {
-          doc.addFileToVFS('HindSiliguri.ttf', fontData);
-          doc.addFont('HindSiliguri.ttf', 'HindSiliguri', 'normal');
-          doc.setFont('HindSiliguri');
-        } else {
-          doc.setFont('helvetica');
-          console.warn('বাংলা ফন্ট লোড করতে ব্যর্থ, হেলভেটিকা ব্যবহার করা হচ্ছে');
-        }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPlayer();
+      drawObstacles();
+      updateObstacles();
+      detectCollision();
+      updateScore();
+      requestAnimationFrame(gameLoop);
+    }
 
-        // Add title
-        doc.setFontSize(18);
-        doc.setTextColor(40, 40, 40);
-        doc.text("সদস্য নিবন্ধন ফরম", 105, 20, {align: "center"});
-        
-        // Add form data
-        doc.setFontSize(12);
-        let y = 40;
-        
-        doc.text("নাম: " + name, 20, y);
-        y += 10;
-        doc.text("ইমেইল: " + email, 20, y);
-        y += 10;
-        doc.text("ফোন নম্বর: " + phone, 20, y);
-        y += 10;
-        doc.text("ঠিকানা:", 20, y);
-        y += 7;
-        
-        // Split address into multiple lines if needed
-        const splitAddress = doc.splitTextToSize(address, 170);
-        doc.text(splitAddress, 20, y);
-        
-        // Add footer
-        doc.setFontSize(10);
-        doc.setTextColor(150, 150, 150);
-        doc.text("© সামাজিক সংগঠন - " + new Date().toLocaleDateString('bn-BD'), 105, 280, {align: "center"});
-        
-        // Save PDF with user's name
-        doc.save(`${name}_সদস্য_তথ্য.pdf`);
-        
-      } catch (error) {
-        console.error("PDF তৈরি করতে সমস্যা:", error);
-        alert("PDF তৈরি করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
-      }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" && player.x > 60) player.x -= 120;
+      if (e.key === "ArrowRight" && player.x < 300) player.x += 120;
     });
+
+    gameLoop();
   </script>
 </body>
 </html>
