@@ -5,67 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>সামাজিক সংগঠনের সদস্য ফরম</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* পূর্বের CSS স্টাইলগুলো এখানে রাখুন */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .form-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin-top: 10px;
+    }
+    input, textarea {
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #1d72b8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #downloadBtn {
+      background-color: #28a745;
+    }
   </style>
 </head>
 <body>
-  <!-- পূর্বের HTML কাঠামো এখানে রাখুন -->
-  
+  <div class="form-container">
+    <h2>সামাজিক সংগঠনের সদস্য ফরম</h2>
+    <form id="memberForm">
+      <label for="name">নাম:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">ইমেইল:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="phone">ফোন নম্বর:</label>
+      <input type="text" id="phone" name="phone" required>
+
+      <label for="address">ঠিকানা:</label>
+      <textarea id="address" name="address" required></textarea>
+
+      <button type="submit">সাবমিট করুন</button>
+      <button type="button" id="downloadBtn">PDF ডাউনলোড করুন</button>
+    </form>
+  </div>
+
   <script>
-    const { jsPDF } = window.jspdf;
-    
-    document.getElementById("downloadBtn").addEventListener("click", function() {
-      const name = document.getElementById("name").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const address = document.getElementById("address").value.trim();
+    // Check if jsPDF is loaded properly
+    if (typeof window.jspdf !== 'undefined') {
+      const { jsPDF } = window.jspdf;
+      
+      document.getElementById("downloadBtn").addEventListener("click", function() {
+        try {
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const phone = document.getElementById("phone").value;
+          const address = document.getElementById("address").value;
 
-      if (!name || !email || !phone || !address) {
-        alert("অনুগ্রহ করে ফরমের সকল তথ্য পূরণ করুন!");
-        return;
-      }
+          if (!name || !email || !phone || !address) {
+            alert("অনুগ্রহ করে সকল ঘর পূরণ করুন!");
+            return;
+          }
 
-      // Create a new PDF document
-      const doc = new jsPDF();
-      
-      // Set Bengali compatible font (if available)
-      doc.setFont("helvetica"); // Fallback to helvetica if Bengali font not available
-      
-      // Add title
-      doc.setFontSize(18);
-      doc.text("সদস্য নিবন্ধন ফরম", 105, 20, {align: "center"});
-      
-      // Add user information
-      doc.setFontSize(12);
-      let y = 40;
-      
-      // Name field
-      doc.text("নাম:", 20, y);
-      doc.text(name, 50, y);
-      y += 10;
-      
-      // Email field
-      doc.text("ইমেইল:", 20, y);
-      doc.text(email, 50, y);
-      y += 10;
-      
-      // Phone field
-      doc.text("ফোন নম্বর:", 20, y);
-      doc.text(phone, 50, y);
-      y += 10;
-      
-      // Address field (with multi-line support)
-      doc.text("ঠিকানা:", 20, y);
-      y += 7;
-      const addressLines = doc.splitTextToSize(address, 150);
-      doc.text(addressLines, 30, y);
-      
-      // Save PDF with user's name
-      const fileName = name + "_সদস্য_ফরম.pdf";
-      doc.save(fileName);
-    });
+          console.log("Creating PDF..."); // Debug log
+          
+          const doc = new jsPDF();
+          
+          // Set font
+          doc.setFont("helvetica");
+          doc.setFontSize(16);
+          
+          // Add title
+          doc.text("সদস্য তথ্য", 105, 20, {align: "center"});
+          
+          // Add user information
+          doc.setFontSize(12);
+          let y = 40;
+          
+          doc.text(`নাম: ${name}`, 20, y);
+          y += 10;
+          doc.text(`ইমেইল: ${email}`, 20, y);
+          y += 10;
+          doc.text(`ফোন: ${phone}`, 20, y);
+          y += 10;
+          doc.text(`ঠিকানা: ${address}`, 20, y);
+          
+          console.log("Saving PDF..."); // Debug log
+          doc.save(`${name}_information.pdf`);
+          
+          console.log("PDF generated successfully"); // Debug log
+        } catch (error) {
+          console.error("PDF generation error:", error);
+          alert("PDF তৈরি করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+        }
+      });
+    } else {
+      console.error("jsPDF library not loaded!");
+      alert("PDF লাইব্রেরি লোড করতে সমস্যা হয়েছে। পৃষ্ঠাটি রিফ্রেশ করুন।");
+    }
   </script>
 </body>
 </html>
