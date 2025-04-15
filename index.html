@@ -7,221 +7,20 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #4361ee;
-      --secondary: #3f37c9;
-      --success: #4cc9f0;
-      --dark: #212529;
-      --light: #f8f9fa;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Hind Siliguri', sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .form-container {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      width: 100%;
-      max-width: 550px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
-    }
-    
-    .form-container:hover {
-      transform: translateY(-5px);
-    }
-
-    .form-header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    
-    .form-header h2 {
-      color: var(--dark);
-      font-size: 28px;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    
-    .form-header p {
-      color: #6c757d;
-      font-size: 16px;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: var(--dark);
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 12px 15px;
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 16px;
-      transition: all 0.3s;
-    }
-    
-    input:focus, textarea:focus {
-      border-color: var(--primary);
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-    }
-    
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    .btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .btn i {
-      margin-right: 8px;
-    }
-    
-    .btn-submit {
-      background-color: var(--primary);
-      color: white;
-    }
-    
-    .btn-submit:hover {
-      background-color: var(--secondary);
-      transform: translateY(-2px);
-    }
-    
-    .btn-download {
-      background-color: var(--success);
-      color: white;
-      margin-top: 10px;
-    }
-    
-    .btn-download:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(76, 201, 240, 0.4);
-    }
-    
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      margin-top: 10px;
-    }
+    /* পূর্বের CSS স্টাইলগুলো এখানে রাখুন */
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <div class="form-header">
-      <h2>সামাজিক সংগঠনের সদস্য ফরম</h2>
-      <p>নিচের ফরমটি পূরণ করে সদস্য হিসেবে নিবন্ধন করুন</p>
-    </div>
-    
-    <form id="memberForm">
-      <div class="form-group">
-        <label for="name">নাম</label>
-        <input type="text" id="name" name="name" placeholder="আপনার পূর্ণ নাম লিখুন" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="email">ইমেইল</label>
-        <input type="email" id="email" name="email" placeholder="আপনার ইমেইল ঠিকানা" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="phone">ফোন নম্বর</label>
-        <input type="text" id="phone" name="phone" placeholder="আপনার মোবাইল নম্বর" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="address">ঠিকানা</label>
-        <textarea id="address" name="address" placeholder="আপনার বর্তমান ঠিকানা" required></textarea>
-      </div>
-      
-      <div class="button-group">
-        <button type="submit" class="btn btn-submit">
-          <i>📩</i> সাবমিট করুন
-        </button>
-        <button type="button" id="downloadBtn" class="btn btn-download">
-          <i>📥</i> PDF ডাউনলোড করুন
-        </button>
-      </div>
-    </form>
-  </div>
-
+  <!-- পূর্বের HTML কাঠামো এখানে রাখুন -->
+  
   <script>
     const { jsPDF } = window.jspdf;
-    // Replace with your Google Apps Script web app URL
-    const SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
-
-    document.getElementById("memberForm").addEventListener("submit", function(event){
-      event.preventDefault();
-      
-      const formData = {
-        name: document.getElementById("name").value,
-        email: document.getElementById("email").value,
-        phone: document.getElementById("phone").value,
-        address: document.getElementById("address").value
-      };
-
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData)
-      })
-      .then(response => response.text())
-      .then(data => {
-        alert("ফরম সফলভাবে জমা হয়েছে!");
-        document.getElementById("memberForm").reset();
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        alert("একটি সমস্যা হয়েছে! পরে আবার চেষ্টা করুন।");
-      });
-    });
-
+    
     document.getElementById("downloadBtn").addEventListener("click", function() {
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
-      const phone = document.getElementById("phone").value;
-      const address = document.getElementById("address").value;
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const address = document.getElementById("address").value.trim();
 
       if (!name || !email || !phone || !address) {
         alert("অনুগ্রহ করে ফরমের সকল তথ্য পূরণ করুন!");
@@ -231,58 +30,41 @@
       // Create a new PDF document
       const doc = new jsPDF();
       
-      // Add logo or header (optional)
-      // doc.addImage(logoData, 'JPEG', 10, 10, 50, 25);
-      
-      // Set styles
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(20);
-      doc.setTextColor(40, 40, 40);
+      // Set Bengali compatible font (if available)
+      doc.setFont("helvetica"); // Fallback to helvetica if Bengali font not available
       
       // Add title
-      doc.text("সদস্য নিবন্ধন ফরম", 105, 30, {align: "center"});
+      doc.setFontSize(18);
+      doc.text("সদস্য নিবন্ধন ফরম", 105, 20, {align: "center"});
       
-      // Add divider line
-      doc.setDrawColor(200, 200, 200);
-      doc.line(20, 40, 190, 40);
-      
-      // Set normal font
-      doc.setFont("helvetica", "normal");
+      // Add user information
       doc.setFontSize(12);
+      let y = 40;
       
-      // Add form data
-      let yPosition = 60;
+      // Name field
+      doc.text("নাম:", 20, y);
+      doc.text(name, 50, y);
+      y += 10;
       
-      doc.setTextColor(30, 30, 30);
-      doc.setFontSize(14);
-      doc.text("ব্যক্তিগত তথ্য:", 20, yPosition);
-      yPosition += 10;
+      // Email field
+      doc.text("ইমেইল:", 20, y);
+      doc.text(email, 50, y);
+      y += 10;
       
-      doc.setFontSize(12);
-      doc.text(`নাম: ${name}`, 20, yPosition);
-      yPosition += 10;
+      // Phone field
+      doc.text("ফোন নম্বর:", 20, y);
+      doc.text(phone, 50, y);
+      y += 10;
       
-      doc.text(`ইমেইল: ${email}`, 20, yPosition);
-      yPosition += 10;
+      // Address field (with multi-line support)
+      doc.text("ঠিকানা:", 20, y);
+      y += 7;
+      const addressLines = doc.splitTextToSize(address, 150);
+      doc.text(addressLines, 30, y);
       
-      doc.text(`ফোন নম্বর: ${phone}`, 20, yPosition);
-      yPosition += 10;
-      
-      doc.text(`ঠিকানা:`, 20, yPosition);
-      yPosition += 7;
-      
-      // Split address into multiple lines if needed
-      const splitAddress = doc.splitTextToSize(address, 170);
-      doc.text(splitAddress, 20, yPosition);
-      yPosition += (splitAddress.length * 7);
-      
-      // Add footer
-      doc.setFontSize(10);
-      doc.setTextColor(150, 150, 150);
-      doc.text("© সামাজিক সংগঠন - " + new Date().toLocaleDateString(), 105, 280, {align: "center"});
-      
-      // Save the PDF with user's name
-      doc.save(`${name}_সদস্য_ফরম.pdf`);
+      // Save PDF with user's name
+      const fileName = name + "_সদস্য_ফরম.pdf";
+      doc.save(fileName);
     });
   </script>
 </body>
