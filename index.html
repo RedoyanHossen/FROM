@@ -2,69 +2,206 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <title>AI প্রশ্নোত্তর</title>
+  <title>AI প্রশ্নোত্তর সিস্টেম</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --text: #1f2937;
+      --light-bg: #f9fafb;
+      --border: #e5e7eb;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
-      font-family: sans-serif;
-      background: #f4f4f4;
+      font-family: 'Hind Siliguri', sans-serif;
+      background-color: var(--light-bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 50px;
+      align-items: center;
     }
+    
     .container {
       background: white;
-      padding: 30px;
-      border-radius: 10px;
+      padding: 2rem;
+      border-radius: 12px;
       width: 100%;
-      max-width: 600px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 650px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
+    
+    h1 {
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      font-size: 1.8rem;
+    }
+    
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+    
     textarea {
       width: 100%;
-      padding: 15px;
-      font-size: 16px;
+      padding: 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      margin-bottom: 15px;
+      resize: none;
+      min-height: 120px;
+      transition: border 0.3s ease;
     }
+    
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #007bff;
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--primary);
       color: white;
       border: none;
       border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
-    .answer {
-      margin-top: 20px;
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    .answer-container {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background-color: var(--light-bg);
+      border-radius: 8px;
+      min-height: 150px;
+    }
+    
+    .answer-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    
+    #response {
       white-space: pre-line;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(37, 99, 235, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .error {
+      color: #dc2626;
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>AI প্রশ্নোত্তর</h2>
-    <textarea id="question" rows="4" placeholder="আপনার প্রশ্ন লিখুন..."></textarea>
-    <button onclick="askAI()">উত্তর জানুন</button>
-    <div id="response" class="answer"></div>
+    <h1>AI প্রশ্নোত্তর সিস্টেম</h1>
+    
+    <div class="input-group">
+      <textarea id="question" rows="4" placeholder="আপনার প্রশ্ন এখানে লিখুন..."></textarea>
+    </div>
+    
+    <button id="askButton" onclick="askAI()">উত্তর জানুন</button>
+    
+    <div class="answer-container">
+      <div class="answer-title">উত্তর:</div>
+      <div id="response">আপনার প্রশ্নের উত্তর এখানে প্রদর্শিত হবে...</div>
+    </div>
   </div>
 
   <script>
     async function askAI() {
-      const question = document.getElementById("question").value;
+      const question = document.getElementById("question").value.trim();
       const responseDiv = document.getElementById("response");
-      responseDiv.innerText = "উত্তর আসছে...";
+      const button = document.getElementById("askButton");
+      
+      if (!question) {
+        responseDiv.innerHTML = '<span class="error">দয়া করে একটি প্রশ্ন লিখুন</span>';
+        return;
+      }
+      
+      // Disable button and show loading
+      button.disabled = true;
+      button.innerHTML = '<span class="loading"></span> প্রক্রিয়াকরণ হচ্ছে...';
+      responseDiv.innerHTML = '<span class="loading"></span> AI আপনার প্রশ্নের উত্তর প্রস্তুত করছে...';
+      
+      try {
+        const res = await fetch("http://localhost:3000/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
 
-      const res = await fetch("http://localhost:3000/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
-      });
-
-      const data = await res.json();
-      responseDiv.innerText = data.answer || "উত্তর পাওয়া যায়নি।";
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        
+        const data = await res.json();
+        responseDiv.innerHTML = data.answer || "কোন উত্তর পাওয়া যায়নি।";
+      } catch (error) {
+        console.error('Error:', error);
+        responseDiv.innerHTML = '<span class="error">ত্রুটি: সার্ভার থেকে উত্তর পাওয়া যায়নি। দয়া করে পরে আবার চেষ্টা করুন।</span>';
+      } finally {
+        button.disabled = false;
+        button.textContent = 'উত্তর জানুন';
+      }
     }
+    
+    // Allow pressing Enter to submit (Shift+Enter for new line)
+    document.getElementById("question").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        askAI();
+      }
+    });
   </script>
 </body>
 </html>
