@@ -1,38 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Subway Dash</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search - AI Text & Image Generator</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-    
-    :root {
-      --neon-blue: #00f2ff;
-      --neon-pink: #ff00f2;
-      --neon-purple: #8a2be2;
-      --dark-bg: #0f0f1a;
-      --darker-bg: #0a0a12;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-    }
-    
     body {
-      font-family: 'Poppins', sans-serif;
-      background: var(--dark-bg);
-      height: 100vh;
-      overflow: hidden;
+      font-family: sans-serif;
+      background: #f0f2f5;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      color: white;
+      padding: 30px;
     }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #output {
+      margin-top: 20px;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Search</h1>
+    <textarea id="prompt" placeholder="Write your prompt here in বাংলা or English..."></textarea>
+    <div class="options">
+      <select id="mode">
+        <option value="text">Text</option>
+        <option value="image">Image</option>
+      </select>
+      <button onclick="generate()">Generate</button>
+    </div>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    async function generate() {
+      const prompt = document.getElementById("prompt").value;
+      const mode = document.getElementById("mode").value;
+      const output = document.getElementById("output");
+
+      if (!prompt) {
+        output.innerHTML = "<p>Please enter a prompt.</p>";
+        return;
+      }
+
+      output.innerHTML = "Generating...";
+
+      try {
+        const response = await fetch('http://localhost:3000/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: prompt,
+            mode: mode,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (mode === 'text') {
+          output.innerHTML = <p>${data.choices[0].message.content}</p>;
+        } else if (mode === 'image') {
+          output.innerHTML = <img src="${data.data[0].url}" alt="Generated Image"/>;
+        }
+      } catch (err) {
+        output.innerHTML = "<p>Something went wrong. Make sure the backend is running.</p>";
+      }
+    }
+  </script>
+</body>
+</html>
     
     #gameContainer {
       position: relative;
